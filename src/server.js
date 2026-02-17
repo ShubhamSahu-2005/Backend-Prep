@@ -6,6 +6,8 @@ import { User } from "./models/user.js";
 import { logger } from "./middleware/logger.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { authHandler } from "./middleware/AuthHandler.js";
+import uploadRoutes from "./src/uploads/route.js";
+
 import cors from "cors";
 
 const app = express();
@@ -39,6 +41,7 @@ app.get(
         res.status(200).json(users);
     })
 );
+app.use("/api/upload", uploadRoutes);
 
 // Create user
 app.post(
