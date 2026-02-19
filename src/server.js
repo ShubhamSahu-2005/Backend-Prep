@@ -6,7 +6,7 @@ import { User } from "./models/user.js";
 import { logger } from "./middleware/logger.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { authHandler } from "./middleware/AuthHandler.js";
-import uploadRoutes from "./src/uploads/route.js";
+import uploadRoutes from "./uploads/route.js";
 
 import cors from "cors";
 
