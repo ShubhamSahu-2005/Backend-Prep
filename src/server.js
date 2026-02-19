@@ -6,7 +6,10 @@ import { User } from "./models/user.js";
 import { logger } from "./middleware/logger.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { authHandler } from "./middleware/AuthHandler.js";
+import { asyncHandler } from "./utils/asyncHandler.js";
 import uploadRoutes from "./src/uploads/route.js";
+import postsRoutes from "./posts/route.js"
+import loginRoutes from "./login/route.js"
 
 import cors from "cors";
 
@@ -22,8 +25,7 @@ app.use(cors({
 ))
 
 // Async wrapper
-const asyncHandler = (fn) => (req, res, next) =>
-    Promise.resolve(fn(req, res, next)).catch(next);
+// Async wrapper imported from utils
 
 // Root Route
 app.get("/", (req, res) => {
@@ -42,6 +44,8 @@ app.get(
     })
 );
 app.use("/api/upload", uploadRoutes);
+app.use("/api/posts", postsRoutes);
+app.use("/api/login", loginRoutes);
 
 // Create user
 app.post(
