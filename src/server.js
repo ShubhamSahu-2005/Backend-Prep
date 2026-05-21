@@ -5,11 +5,7 @@ import { connectDb } from "./utils/connectDb.js";
 import { User } from "./models/user.js";
 import { logger } from "./middleware/logger.js";
 import { errorHandler } from "./middleware/errorHandler.js";
-import { authHandler } from "./middleware/AuthHandler.js";
-import { asyncHandler } from "./utils/asyncHandler.js";
-import uploadRoutes from "./src/uploads/route.js";
-import postsRoutes from "./posts/route.js"
-import loginRoutes from "./login/route.js"
+
 
 import cors from "cors";
 
