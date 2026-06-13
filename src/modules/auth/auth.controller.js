@@ -3,17 +3,20 @@ import { User } from "../../models/User.js";
 import { RefreshToken } from "../../models/refreshToken.js";
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt";
+import Redis from "ioredis";
 
+import { z } from "zod"
+import { userAuthSchema } from "../../validation/validUser.js";
+import { ZodAny } from "zod";
+
+const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6739");
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || "88fcf1_access_token_secret_key_97531";
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "88fcf1_refresh_token_secret_key_97531";
 
 
 export const registerUser = async (req, res, next) => {
     try {
-        const { name, email, password } = req.body;
-        if (!name || !email || !password) {
-            return res.status(400).json({
-                message: "Some of the Fields are Missing",
-            })
-        }
+        const { name, email, password } = userAuthSchema.parse(req.body);
         const existing = await User.findOne({
             email
         });
@@ -26,12 +29,16 @@ export const registerUser = async (req, res, next) => {
         const user = await User.create({
             name, email, password: hashed,
         });
+        await redis.del("users");
         return res.status(201).json({
             message: "User Registered",
             user
         })
 
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({ errors: error.errors });
+        }
         next(error)
 
     }
@@ -64,12 +71,12 @@ export const login = async (req, res, next) => {
         }
         const accessToken = jwt.sign(
             payload,
-            process.env.ACCESS_TOKEN_SECRET,
+            ACCESS_TOKEN_SECRET,
             { expiresIn: "15m" }
         );
         const refreshToken = jwt.sign(
             payload,
-            process.env.REFRESH_TOKEN_SECRET,
+            REFRESH_TOKEN_SECRET,
             { expiresIn: "7d" }
         );
         await RefreshToken.create({
@@ -110,7 +117,7 @@ export const refreshToken = async (req, res, next) => {
         }
         let decoded;
         try {
-            decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+            decoded = jwt.verify(token, REFRESH_TOKEN_SECRET);
         } catch (error) {
             return res.status(400).json({
                 message: "Invalid Refresh token",
@@ -130,8 +137,8 @@ export const refreshToken = async (req, res, next) => {
             email: decoded.email
         };
         await RefreshToken.deleteOne({ token: token });
-        const newAccessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
-        const newRefreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
+        const newAccessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
+        const newRefreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
         await RefreshToken.create({
             userId: refToken.userId,
             token: newRefreshToken,
@@ -142,7 +149,7 @@ export const refreshToken = async (req, res, next) => {
             secure: true,
             sameSite: "strict",
             maxAge: 15 * 60 * 1000,
-        }).cookie("refreshToken", newrefreshToken, {
+        }).cookie("refreshToken", newRefreshToken, {
             httpOnly: true,
             secure: true,
             sameSite: "strict",
