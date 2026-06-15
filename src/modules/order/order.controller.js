@@ -2,6 +2,7 @@ import Razorpay from "razorpay";
 
 import crypto from 'crypto'
 import { Order } from "../../models/order.js";
+import { eventBus } from "../../events/eventBus.js";
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY,
@@ -67,6 +68,13 @@ export const verifyPayment = async (req, res) => {
             paymentStatus: "Done",
             orderStatus: "confirmed",
             paymentId: razorpay_payment_id,
+        })
+        const order = await Order.findOne({ orderId: razorpay_order_id });
+        eventBus.emit("paymentSuccess", {
+            email: order.email,
+            paymentId: razorpay_payment_id,
+
+
         })
         res.status(200).json({
             success: true,

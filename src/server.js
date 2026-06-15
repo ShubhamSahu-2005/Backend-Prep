@@ -5,6 +5,7 @@ import { todoRoutes } from "./modules/todo/todo.routes.js";
 import { connectDb } from "./utils/connectDb.js";
 import Redis from "ioredis";
 import session from "express-session";
+import "./events/paymentEvent.js"
 import passport from "passport";
 import mongoose from "mongoose";
 import('./config/passport.js');
