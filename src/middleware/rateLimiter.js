@@ -18,8 +18,8 @@ const requestCount = new Map(); // Use Map instead of array
 export const rateLimiter = async (req, res, next) => {
     const ip = req.ip;
     const now = Date.now();
-    const timeLimit = 15 * 60 * 1000;
-    const limit = 100;
+    const timeLimit = 1 * 60 * 1000;
+    const limit = 5;
 
     if (!requestCount.has(ip)) {
         requestCount.set(ip, {
