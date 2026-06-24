@@ -29,6 +29,7 @@ export const registerUser = async (req, res, next) => {
         const user = await User.create({
             name, email, password: hashed,
         });
+        const jobId = await emailProducer.sendWelcomeEmail(userId, email);
         await redis.del("users");
         return res.status(201).json({
             message: "User Registered",
