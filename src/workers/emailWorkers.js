@@ -37,7 +37,11 @@ emailQueue.process('*', 5, async (job) => {
         await job.progress(20);
 
         // Get template content
-        const emailContent = templates[template](data);
+        const buildTemplate = templates[template];
+        if (!buildTemplate) {
+            throw new Error(`Unknown email template: ${template}`);
+        }
+        const emailContent = buildTemplate(data);
 
         await job.progress(50);
 
